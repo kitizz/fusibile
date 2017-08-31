@@ -436,12 +436,9 @@ int runcuda(GlobalState &gs, PointCloudList &pc_list, int num_views)
 {
     printf("Run cuda\n");
     /*GlobalState *gs = new GlobalState;*/
-    if(gs.params->color_processing) {
-        printf(" KIT: Running color cuda\n");
+    if(gs.params->color_processing)
         fusibile_cu<float4>(gs, pc_list, num_views);
-    } else {
-        printf(" KIT: Running grey cuda\n");
+    else
         fusibile_cu<float>(gs, pc_list, num_views);
-    }
     return 0;
 }
