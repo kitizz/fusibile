@@ -460,7 +460,7 @@ static void addImageToTextureFloatColor (vector<Mat > &imgs, cudaTextureObject_t
         int cols = imgs[i].cols;
         // Create channel with floating point type
         cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<float4>();
-
+        // cout << "Im size: " << cols << " x " << rows << '\n';
         // Allocate array with correct size and number of channels
         cudaArray *cuArray;
         checkCudaErrors(cudaMallocArray(&cuArray,
@@ -810,6 +810,7 @@ static int runFusibile (int argc,
         img_grayscale[i].convertTo(img_grayscale_uint[i], CV_16UC1); // or CV_32F works (too)
         if(algParameters.color_processing) {
             vector<Mat_<float> > rgbChannels ( 3 );
+            cout << "Converting image to color: " << img_grayscale[0].rows << " x " << img_grayscale[0].cols << '\n';
             img_color_float_alpha[i] = Mat::zeros ( img_grayscale[0].rows, img_grayscale[0].cols, CV_32FC4 );
             img_color[i].convertTo (img_color_float[i], CV_32FC3); // or CV_32F works (too)
             Mat alpha( img_grayscale[0].rows, img_grayscale[0].cols, CV_32FC1 );
@@ -834,7 +835,7 @@ static int runFusibile (int argc,
         else
             addImageToTextureFloatGray (img_grayscale_float, gs->imgs);
     }
-
+    cout << "Adding normals and depths\n";
     addImageToTextureFloatColor (normals_and_depth, gs->normals_depths);
 
 #define pow2(x) ((x)*(x))

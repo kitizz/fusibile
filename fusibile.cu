@@ -172,7 +172,8 @@ __global__ void fusibile (GlobalState &gs, int ref_camera)
     //printf("3d Point is %f %f %f\n", X.x, X.y, X.z);
     float4 consistent_X = X;
     float4 consistent_normal  = normal;
-    float consistent_texture = tex2D<float> (gs.imgs[ref_camera], p.x+0.5f, p.y+0.5f);
+    // float consistent_texture = tex2D<float> (gs.imgs[ref_camera], p.x+0.5f, p.y+0.5f);
+    float4 consistent_texture = tex2D<float4> (gs.imgs[ref_camera], p.x+0.5f, p.y+0.5f);
     int number_consistent = 0;
     //int2 used_list[camParams.viewSelectionSubsetNumber];
     int2 used_list[MAX_IMAGES];
@@ -224,7 +225,8 @@ __global__ void fusibile (GlobalState &gs, int ref_camera)
                     //consistent_X      = tmp_X;
                     consistent_normal = consistent_normal + tmp_normal_and_depth;
                     if (gs.params->saveTexture)
-                        consistent_texture = consistent_texture + tex2D<float> (gs.imgs[idxCurr], tmp_pt.x+0.5f, tmp_pt.y+0.5f);
+                        // consistent_texture = consistent_texture + tex2D<float> (gs.imgs[idxCurr], tmp_pt.x+0.5f, tmp_pt.y+0.5f);
+                        consistent_texture = consistent_texture + tex2D<float4> (gs.imgs[idxCurr], tmp_pt.x+0.5f, tmp_pt.y+0.5f);
 
 
                     // Save the point for later check
@@ -251,7 +253,7 @@ __global__ void fusibile (GlobalState &gs, int ref_camera)
     // (optional) save texture
     if (number_consistent >= gs.params->numConsistentThresh) {
         //printf("\tEnough consistent points!\nSaving point %f %f %f", consistent_X.x, consistent_X.y, consistent_X.z);
-        if (!gs.params->remove_black_background || consistent_texture>15) // hardcoded for middlebury TODO FIX
+        if (!gs.params->remove_black_background)// || consistent_texture>15) // hardcoded for middlebury TODO FIX
         {
             gs.pc->points[center].coord  = consistent_X;
             gs.pc->points[center].normal = consistent_normal;
@@ -285,7 +287,7 @@ void copy_point_cloud_to_host(GlobalState &gs, int cam, PointCloudList &pc_list)
             Point_cu &p = gs.pc->points[x+y*gs.pc->cols];
             const float4 X      = p.coord;
             const float4 normal = p.normal;
-            float texture = 127.0f;
+            float4 texture = make_float4(127.0f, 127.0f, 127.0f, 255.0f);
 #ifdef SAVE_TEXTURE
             if (gs.params->saveTexture)
                 texture = p.texture;
@@ -434,9 +436,12 @@ int runcuda(GlobalState &gs, PointCloudList &pc_list, int num_views)
 {
     printf("Run cuda\n");
     /*GlobalState *gs = new GlobalState;*/
-    if(gs.params->color_processing)
+    if(gs.params->color_processing) {
+        printf(" KIT: Running color cuda\n");
         fusibile_cu<float4>(gs, pc_list, num_views);
-    else
+    } else {
+        printf(" KIT: Running grey cuda\n");
         fusibile_cu<float>(gs, pc_list, num_views);
+    }
     return 0;
 }

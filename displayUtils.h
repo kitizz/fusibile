@@ -105,7 +105,11 @@ static void storePlyFileBinaryPointCloud (char* plyFilePath, PointCloudList &pc,
         const Point_li &p = pc.points[i];
         const float4 normal = p.normal;
         float4 X = p.coord;
-        const char color = (int)p.texture;
+        // const char color = (int)p.texture;
+        // Flip channels because of OpenCV's BGR convention
+        const char blue = int(p.texture.x);
+        const char green = int(p.texture.y);
+        const char red = int(p.texture.z);
         /*const int color = 127.0f;*/
         /*printf("Writing point %f %f %f\n", X.x, X.y, X.z);*/
 
@@ -123,9 +127,9 @@ static void storePlyFileBinaryPointCloud (char* plyFilePath, PointCloudList &pc,
             fwrite(&normal.x, sizeof(normal.x), 1, outputPly);
             fwrite(&normal.y, sizeof(normal.y), 1, outputPly);
             fwrite(&normal.z, sizeof(normal.z), 1, outputPly);
-            fwrite(&color,  sizeof(char), 1, outputPly);
-            fwrite(&color,  sizeof(char), 1, outputPly);
-            fwrite(&color,  sizeof(char), 1, outputPly);
+            fwrite(&red,  sizeof(char), 1, outputPly);
+            fwrite(&green,  sizeof(char), 1, outputPly);
+            fwrite(&blue,  sizeof(char), 1, outputPly);
         }
 
     }
@@ -205,9 +209,12 @@ static void storePlyFileAsciiPointCloud (char* plyFilePath, PointCloudList &pc, 
         const Point_li &p = pc.points[i];
         const float4 normal = p.normal;
         float4 X = p.coord;
-        const int color = (int)p.texture;
+        // const int color = (int)p.texture;
         /*const int color = 127.0f;*/
         /*printf("Writing point %f %f %f\n", X.x, X.y, X.z);*/
+        const char blue = int(p.texture.x);
+        const char green = int(p.texture.y);
+        const char red = int(p.texture.z);
 
         if(!(X.x < FLT_MAX && X.x > -FLT_MAX) || !(X.y < FLT_MAX && X.y > -FLT_MAX) || !(X.z < FLT_MAX && X.z >= -FLT_MAX)){
             X.x = 0.0f;
@@ -216,7 +223,7 @@ static void storePlyFileAsciiPointCloud (char* plyFilePath, PointCloudList &pc, 
         }
 #pragma omp critical
         {
-            myfile << X.x << " " << X.y << " " << X.z << " " << normal.x << " " << normal.y << " " << normal.z << " " << color << " " << color << " " << color << endl;
+            myfile << X.x << " " << X.y << " " << X.z << " " << normal.x << " " << normal.y << " " << normal.z << " " << red << " " << green << " " << blue << endl;
             /*fwrite(&X.x,      sizeof(float), 1, outputPly);*/
             /*fwrite(&X.y,      sizeof(float), 1, outputPly);*/
             /*fwrite(&X.z,      sizeof(float), 1, outputPly);*/
