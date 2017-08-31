@@ -1,3 +1,7 @@
+# Fork Modifications (Kitizz)
+I've modified the original work of Fusible to output color point clouds. This hasn't been properly tested with the -color_processing flag, so your mileage may vary.
+Enjoy!
+
 # fusibile
 Source code for the paper
 
